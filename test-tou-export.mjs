@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {parseTou} from './parser.mjs';
+import {prepareEditing,editReading,restoreRows} from './edit.mjs';
+import {exportTou} from './tou-export.mjs';
+const demo=readFileSync(new URL('./demo.js',import.meta.url),'utf8');
+const original=Uint8Array.from(Buffer.from(/"([^"]+)"/.exec(demo)[1],'base64'));
+const ds=prepareEditing(parseTou(original.buffer,'D2CSep26.tou'));
+assert.deepEqual(exportTou(ds),original);
+editReading(ds,0,'demand','100');editReading(ds,1,'energy','97938');
+const updated=exportTou(ds),parsed=parseTou(updated.buffer,'D2CSep26.tou');
+assert.equal(parsed.rows[0].demand,100);assert.equal(parsed.rows[1].energy,97938);
+assert.equal(updated.length,original.length);assert.deepEqual(updated.slice(0,64),original.slice(0,64));
+assert.deepEqual(updated.slice(80,88),original.slice(80,88));
+assert.deepEqual(updated.slice(96),original.slice(96));
+assert.deepEqual(new Uint8Array(ds.sourceBuffer),original);
+restoreRows(ds,[0,1]);assert.deepEqual(exportTou(ds),original);
+console.log('PASS: unchanged byte-identical; edited values reparse; header, size, other fields and spare rows preserved; source untouched; restore round trip.');

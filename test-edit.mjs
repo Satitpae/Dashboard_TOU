@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {prepareEditing,editReading,restoreRows,isEdited} from './edit.mjs';
+import {dailyTou} from './tou.mjs';
+const start=Date.UTC(2026,8,1),allRows=Array.from({length:97},(_,i)=>({name:'test',index:i,date:new Date(start+i*900000).toISOString().slice(0,10),demand:1,energy:1000+i,zero:false}));
+const ds=prepareEditing({name:'test',allRows,rows:allRows.slice(0,96)});
+editReading(ds,36,'demand','123.456');assert.equal(dailyTou(ds)[0].demand[1],123.456);
+editReading(ds,36,'energy','1040');assert.equal(dailyTou(ds)[0].energy[1],null);assert.equal(ds.rows[36].delta,5);assert.equal(ds.rows[37].status,'decreased');assert.equal(isEdited(ds.rows[36]),true);
+assert.throws(()=>editReading(ds,0,'date','2'));assert.throws(()=>editReading(ds,0,'energy',''));assert.throws(()=>editReading(ds,0,'demand','-1'));assert.throws(()=>editReading(ds,0,'energy','Infinity'));
+editReading(ds,8,'demand','0');editReading(ds,8,'energy','0');assert.equal(ds.rows[8].zero,true);assert.equal(ds.rows[9].delta,null);
+restoreRows(ds,[8,36]);assert.equal(isEdited(ds.rows[36]),false);assert.equal(ds.rows[36].energy,1036);assert.equal(ds.rows[37].delta,1);assert.equal(ds.rows[8].zero,false);
+console.log('PASS: only two fields editable, TOU recalculates, adjacent rows refresh, zero gaps, validation, original restore.');
