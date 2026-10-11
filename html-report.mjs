@@ -21,8 +21,21 @@ export function parseReport(text,name){
   if(!rows.length||!total)throw Error('ไม่พบตาราง TOU รายวันและ TOTAL ตามรูปแบบตัวอย่าง');
   return {name,title,period:period[1]+' '+period[2],rows:rows.sort((a,b)=>a.day-b.day),total};
 }
+function drawBars(id,rows,demand){
+  const colors=['#26795c','#c99e36','#4e81b9'],names=['OffPeak','OnPeak','Holiday'];
+  const width=Math.max(900,rows.length*32+90),height=310,left=65,top=20,plotH=235,plotW=width-left-20;
+  const maximum=Math.max(1,...rows.map(r=>demand?Math.max(...r.values.slice(4).map(v=>v??0)):r.values.slice(0,3).reduce((s,v)=>s+(v??0),0)))*1.1;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.style.minWidth=width+'px';svg.setAttribute('role','img');svg.setAttribute('aria-label',demand?'Maximum Demand รายวัน แยก OffPeak OnPeak Holiday':'Energy รายวัน แท่งสะสม OffPeak OnPeak Holiday');
+  const node=(tag,attrs,text)=>{const n=document.createElementNS(svg.namespaceURI,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
+  for(let j=0;j<=4;j++){const y=top+plotH-j*plotH/4;svg.append(node('line',{x1:left,x2:width-20,y1:y,y2:y,stroke:'#e1e7df'}));svg.append(node('text',{x:left-9,y:y+4,'text-anchor':'end',fill:'#65776f','font-size':11},fmt(maximum*j/4)));}
+  const slot=plotW/rows.length;
+  rows.forEach((r,j)=>{let base=0;for(let i=0;i<3;i++){const value=r.values[demand?i+4:i];if(value===null)continue;const h=value/maximum*plotH;const w=demand?(slot-8)/3:slot-9;const x=left+j*slot+4+(demand?i*w:0);const rect=node('rect',{x,y:top+plotH-h-(demand?0:base),width:Math.max(1,w-1),height:h,fill:colors[i],rx:1});rect.append(node('title',{},`${r.label} · ${names[i]}: ${fmt(value)} ${demand?'kW':'kWh'}`));svg.append(rect);if(!demand)base+=h;}
+    svg.append(node('text',{x:left+j*slot+slot/2,y:top+plotH+19,'text-anchor':'middle',fill:'#65776f','font-size':11},String(r.day).padStart(2,'0')));
+  });
+  svg.append(node('text',{x:left+plotW/2,y:height-8,'text-anchor':'middle',fill:'#65776f','font-size':12},'วันที่'));$(id).append(svg);
+}
 function render(){
-  const report=reports.get($('reportSelect').value);$('reportBody').replaceChildren();$('energyBars').replaceChildren();
+  const report=reports.get($('reportSelect').value);$('reportBody').replaceChildren();$('energyBars').replaceChildren();$('demandBars').replaceChildren();
   $('reportName').textContent=report?`${report.title} · ${report.period}`:'เลือกไฟล์รายงานเพื่อเริ่มต้น';
   $('htmlEnergy').textContent=report&&report.total[3]!==null?fmt(report.total[3]):'—';
   $('htmlDemand').textContent=report?fmt(Math.max(...report.total.slice(4).filter(v=>v!==null))):'—';
@@ -32,8 +45,8 @@ function render(){
     const tr=document.createElement('tr');if(row.label==='TOTAL')tr.className='total';
     for(const v of [row.label,...row.values]){const td=document.createElement('td');td.textContent=v===null?'—':typeof v==='number'?fmt(v):v;tr.append(td);}$('reportBody').append(tr);
   }
-  const maximum=Math.max(1,...report.rows.map(r=>r.values[3]??0));
-  for(const row of report.rows){const bar=document.createElement('div');bar.className='energy-day';const label=document.createElement('span');label.textContent=String(row.day).padStart(2,'0');const stack=document.createElement('div');stack.className='energy-stack';for(let i=0;i<3;i++){const part=document.createElement('i');part.style.width=((row.values[i]??0)/maximum*100)+'%';part.style.background=['#26795c','#c99e36','#4e81b9'][i];part.title=['OffPeak','OnPeak','Holiday'][i]+': '+(row.values[i]===null?'—':fmt(row.values[i]))+' kWh';stack.append(part);}const value=document.createElement('span');value.textContent=row.values[3]===null?'—':fmt(row.values[3]);bar.append(label,stack,value);$('energyBars').append(bar);}
+  drawBars('energyBars',report.rows,false);
+  drawBars('demandBars',report.rows,true);
 }
 async function load(files){const messages=[];for(const file of files){try{if(!/\.html?$/i.test(file.name))throw Error('เลือกไฟล์ .html หรือ .htm');const bytes=await file.arrayBuffer();let text=new TextDecoder('utf-8').decode(bytes);if(/charset\s*=\s*["']?windows-874/i.test(text))text=new TextDecoder('windows-874').decode(bytes);const r=parseReport(text,file.name);reports.set(file.name,r);messages.push('✓ '+file.name);}catch(e){messages.push('✕ '+file.name+': '+e.message);}}
   $('htmlMessage').textContent=messages.join('\n');const old=$('reportSelect').value;$('reportSelect').replaceChildren();for(const name of reports.keys())$('reportSelect').add(new Option(name,name));$('reportSelect').value=reports.has(old)?old:[...reports.keys()].at(-1)||'';render();
