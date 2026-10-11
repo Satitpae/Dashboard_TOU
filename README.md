@@ -69,7 +69,7 @@ then open http://localhost:8765. JavaScript modules require an HTTP server.
 
 Select multiple `.tou` files or drag them onto the upload area. The filename is the
 meter identifier; selecting the same filename replaces it. Files are parsed locally
-and are not uploaded. Reloading restores the bundled sample, not imported files.
+and are not uploaded. The dashboard starts empty; choose your TOU files after opening or reloading.
 
 Filter by meter and date. Charts show Demand and daily energy from adjacent readings.
 The raw table preserves raw zero values and displays Day only at each day's first row
@@ -79,9 +79,9 @@ The raw table preserves raw zero values and displays Day only at each day's firs
 
 Upload this directory's files to the root of a GitHub repository. In Settings → Pages,
 choose Deploy from a branch, select the branch and /(root), then Save.
-Keep `.nojekyll`, `parser.mjs`, and `demo.js` alongside `index.html`.
+Keep `.nojekyll` and `parser.mjs` alongside `index.html`.
 
-The bundled sample is synthetic. Uploaded meter files stay in the browser.
+No demo data is bundled. Uploaded meter files stay in the browser.
 
 ## Interpretation
 

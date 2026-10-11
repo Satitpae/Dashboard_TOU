@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {fixtureTou} from './test-fixture.mjs';
 import {parseTou} from './parser.mjs';
 import {prepareEditing,editReading,restoreRows} from './edit.mjs';
 import {exportTou} from './tou-export.mjs';
-const demo=readFileSync(new URL('./demo.js',import.meta.url),'utf8');
-const original=Uint8Array.from(Buffer.from(/"([^"]+)"/.exec(demo)[1],'base64'));
+const original=fixtureTou();
 const ds=prepareEditing(parseTou(original.buffer,'D2CSep26.tou'));
 assert.deepEqual(exportTou(ds),original);
 editReading(ds,0,'demand','100');editReading(ds,1,'energy','97938');

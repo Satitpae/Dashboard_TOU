@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
+import {fixtureTou} from './test-fixture.mjs';
 import {parseTou,periodFromFilename} from './parser.mjs';
 import {dailyTou} from './tou.mjs';
 assert.equal(periodFromFilename('D2CSep26.tou').key,'2026-09');
@@ -8,8 +8,7 @@ assert.equal(periodFromFilename('AnyFeb28.tou').end,'2028-02-29');
 assert.equal(periodFromFilename('AnyFeb27.tou').end,'2027-02-28');
 assert.equal(periodFromFilename('D2CSep26.tou').device,'D2C');
 assert.throws(()=>periodFromFilename('Device.tou'));
-const b=readFileSync(new URL('./demo.js',import.meta.url),'utf8');
-const buffer=Uint8Array.from(Buffer.from(/"([^"]+)"/.exec(b)[1],'base64')).buffer;
+const buffer=fixtureTou().buffer;
 const sep=parseTou(buffer,'DeviceSep26.tou'),oct=parseTou(buffer,'DeviceOct26.tou');
 assert.equal(sep.rows.length,2880);assert.equal(oct.rows.length,2976);
 assert.equal(oct.rows[0].date,'2026-10-01');
