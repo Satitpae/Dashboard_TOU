@@ -24,12 +24,12 @@ export function parseReport(text,name){
 function drawBars(id,rows,demand){
   const colors=['#26795c','#c99e36','#4e81b9'],names=['OffPeak','OnPeak','Holiday'];
   const width=Math.max(900,rows.length*32+90),height=310,left=65,top=20,plotH=235,plotW=width-left-20;
-  const maximum=Math.max(1,...rows.map(r=>demand?Math.max(...r.values.slice(4).map(v=>v??0)):r.values.slice(0,3).reduce((s,v)=>s+(v??0),0)))*1.1;
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.style.minWidth=width+'px';svg.setAttribute('role','img');svg.setAttribute('aria-label',demand?'Maximum Demand รายวัน แยก OffPeak OnPeak Holiday':'Energy รายวัน แท่งสะสม OffPeak OnPeak Holiday');
+  const maximum=Math.max(1,...rows.map(r=>r.values.slice(demand?4:0,demand?7:3).reduce((s,v)=>s+(v??0),0)))*1.1;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.style.minWidth=width+'px';svg.setAttribute('role','img');svg.setAttribute('aria-label',demand?'Demand รายวัน แท่งสะสม OffPeak OnPeak Holiday':'Energy รายวัน แท่งสะสม OffPeak OnPeak Holiday');
   const node=(tag,attrs,text)=>{const n=document.createElementNS(svg.namespaceURI,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;};
   for(let j=0;j<=4;j++){const y=top+plotH-j*plotH/4;svg.append(node('line',{x1:left,x2:width-20,y1:y,y2:y,stroke:'#e1e7df'}));svg.append(node('text',{x:left-9,y:y+4,'text-anchor':'end',fill:'#65776f','font-size':11},fmt(maximum*j/4)));}
   const slot=plotW/rows.length;
-  rows.forEach((r,j)=>{let base=0;for(let i=0;i<3;i++){const value=r.values[demand?i+4:i];if(value===null)continue;const h=value/maximum*plotH;const w=demand?(slot-8)/3:slot-9;const x=left+j*slot+4+(demand?i*w:0);const rect=node('rect',{x,y:top+plotH-h-(demand?0:base),width:Math.max(1,w-1),height:h,fill:colors[i],rx:1});rect.append(node('title',{},`${r.label} · ${names[i]}: ${fmt(value)} ${demand?'kW':'kWh'}`));svg.append(rect);if(!demand)base+=h;}
+  rows.forEach((r,j)=>{let base=0;for(let i=0;i<3;i++){const value=r.values[demand?i+4:i];if(value===null)continue;const h=value/maximum*plotH;const w=slot-9;const x=left+j*slot+4;const rect=node('rect',{x,y:top+plotH-h-base,width:Math.max(1,w-1),height:h,fill:colors[i],rx:1});rect.append(node('title',{},`${r.label} · ${names[i]}: ${fmt(value)} ${demand?'kW':'kWh'}`));svg.append(rect);base+=h;}
     svg.append(node('text',{x:left+j*slot+slot/2,y:top+plotH+19,'text-anchor':'middle',fill:'#65776f','font-size':11},String(r.day).padStart(2,'0')));
   });
   svg.append(node('text',{x:left+plotW/2,y:height-8,'text-anchor':'middle',fill:'#65776f','font-size':12},'วันที่'));$(id).append(svg);
