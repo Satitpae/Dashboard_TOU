@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TOU · Energy Dashboard</title><link rel="stylesheet" href="style.css"></head>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TOU · Energy Dashboard</title><link rel="stylesheet" href="style.css"><style>.main-menu{display:flex;gap:10px;margin-bottom:24px}.main-menu a{padding:11px 18px;border-radius:8px;text-decoration:none;color:#345248;background:white;border:1px solid #d9e1d9}.main-menu a[aria-current]{background:#173e33;color:white}</style></head>
 <body><main>
 <header><div><div class="eyebrow">TOU / ENERGY EXPLORER</div><h1>ภาพรวมการใช้พลังงาน</h1><p>อ่านไฟล์มิเตอร์ เปรียบเทียบจุดวัด และตรวจข้อมูลในหน้าเดียว</p></div><span class="badge">ประมวลผลในเบราว์เซอร์</span></header>
+<nav class="main-menu" aria-label="เมนูหลัก"><a href="index.html" aria-current="page">ข้อมูลจาก .tou</a><a href="html-report.html">รายงาน .html</a></nav>
 <section id="drop" class="upload"><div><h2>วางไฟล์ .tou ของคุณที่นี่</h2><p>เลือกหลายไฟล์ได้ · ไฟล์อยู่บนเครื่องคุณ · ไม่ส่งไปเซิร์ฟเวอร์</p></div><div class="actions"><label class="button">เลือกไฟล์<input id="files" type="file" accept=".tou" multiple hidden></label></div></section>
 <p id="message" role="status" aria-live="polite"></p>
 <section class="filters"><label>เดือนข้อมูล<select id="period"></select></label><label>จุดวัด<select id="meter"><option value="all">ทุกจุดวัด</option></select></label><label>ตั้งแต่วันที่<input type="date" id="from"></label><label>ถึงวันที่<input type="date" id="to"></label><button id="export" class="secondary">ดาวน์โหลด Excel</button><button id="touExport" class="secondary" title="ส่งออกทั้งไฟล์พร้อมค่าที่แก้ไข ไม่ตัดตามช่วงวันที่">ดาวน์โหลด .tou</button><button id="clear" class="secondary">ล้างข้อมูล</button></section>

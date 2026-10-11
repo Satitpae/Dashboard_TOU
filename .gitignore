@@ -3,3 +3,4 @@
 *.html
 !index.html
 outputs/
+!html-report.html

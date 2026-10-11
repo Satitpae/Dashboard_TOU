@@ -130,3 +130,7 @@ The dashboard always uses verified report mode: first-day 00:15 baseline and
 shared Demand boundaries. Alternative baseline/boundary controls have been removed
 to prevent inconsistent reports. Both supplied CO and NSTDA-COOP HTML files
 are checked with verify-source-report.mjs (217 values each).
+
+## HTML reports
+
+Open html-report.html from the main menu to import one or more Data Smart View TOU Daily Summary .html/.htm reports. The page displays daily values and the original TOTAL directly, without recomputing from TOU readings. File contents are parsed as inert HTML and only text/numbers are rendered; uploaded scripts are never executed. Reports remain in browser memory until reload. CSV export retains all seven numeric columns.
