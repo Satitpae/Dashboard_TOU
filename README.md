@@ -134,3 +134,7 @@ are checked with verify-source-report.mjs (217 values each).
 ## HTML reports
 
 Open html-report.html from the main menu to import one or more Data Smart View TOU Daily Summary .html/.htm reports. The page displays daily values and the original TOTAL directly, without recomputing from TOU readings. File contents are parsed as inert HTML and only text/numbers are rendered; uploaded scripts are never executed. Reports remain in browser memory until reload. CSV export retains all seven numeric columns.
+
+## Missing TOU switching register
+
+If the 09:00 or 22:00 Energy register is zero, use the last nonzero reading before that boundary within the same day for both adjacent segments, matching the original report. The status names the substituted time. Never interpolate or substitute missing midnight boundaries; counter resets still invalidate a segment. Demand continues to use its actual time slots. Regression: node test-missing-boundary.mjs.
