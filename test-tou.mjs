@@ -15,7 +15,7 @@ assert.equal(totalTou(days).demand[0],300);assert.equal(totalTou(days).energy[3]
 allRows[8].energy=0;allRows[8].zero=true;
 assert.equal(dailyTou(dataset,{firstDayQuarter:false})[0].energy[3],96);
 allRows[36].energy=0;
-assert.equal(dailyTou(dataset)[0].energy[1],null);
+assert.equal(dailyTou(dataset)[0].energy[1],53); // 09:00 missing: split at 08:45.
 allRows[36].energy=1036;allRows[50].energy=10;
 assert.equal(dailyTou(dataset)[0].energy[3],null);
 assert.equal(isHoliday('2026-01-02'),false);assert.equal(isHoliday('2026-05-01'),true);
