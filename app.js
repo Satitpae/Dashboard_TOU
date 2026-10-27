@@ -2,7 +2,7 @@ import {parseTou} from './parser.mjs';
 import {rawExcel} from './excel.mjs';
 import {exportTou} from './tou-export.mjs';
 import {prepareEditing,isEdited,editReading,restoreRows} from './edit.mjs';
-import {dailyTou,totalTou} from './tou.mjs?v=20261027-boundary';
+import {dailyTou,totalTou} from './tou.mjs?v=20261027-boundary2';
 const $=id=>document.getElementById(id), datasets=new Map(), colors=['#26795c','#c99e36','#4e81b9','#b26076','#7874ad','#60a1a0','#cb804c','#6d984f','#9a7c65','#547a88'];
 let page=0, selectedRows=[], dailyRows=[];
 const number=x=>x.toLocaleString('en-US',{maximumFractionDigits:3});
