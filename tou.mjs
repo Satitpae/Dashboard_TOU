@@ -12,7 +12,16 @@ export function dailyTou(dataset,{extra=new Set(),firstDayQuarter=true,boundarie
     const s=dayIndex*96, holiday=isHoliday(date,extra);
     const end=Math.min(96,lastEnergy-s),partial=end>=0&&end<96;
     const w=rows.slice(s,s+Math.max(0,end+1));
+    const fallback=new Map();
+    const boundary=offset=>{
+      if((offset!==36&&offset!==88)||holiday||rows[s+offset]?.energy!==0)return offset;
+      let previous=offset-1;
+      while(previous>=0&&rows[s+previous]?.energy===0)previous--;
+      if(previous>=0&&rows[s+previous]){fallback.set(offset,previous);return previous;}
+      return offset;
+    };
     const diff=(a,b)=>{
+      a=boundary(a);b=boundary(b);
       const left=rows[s+a],right=rows[s+b];
       if(!left||!right||left.energy===0||right.energy===0||right.energy<left.energy)return null;
       // Never accept a register reset inside a segment, even if its final reading recovered.
@@ -31,8 +40,9 @@ export function dailyTou(dataset,{extra=new Set(),firstDayQuarter=true,boundarie
     const dOn=holiday?0:max(w.slice(36,boundaries==='report'?89:88));
     const dHoliday=holiday?max(w.slice(0,boundaries==='report'?97:96)):0;
     const gaps=w.filter(r=>r.energy===0).length,any=w.slice(0,96).some(r=>!r.zero);
+    const fallbackNote=[...fallback].map(([at,used])=>`${rows[s+at].time} ใช้ ${rows[s+used].time}`).join(', ');
     return {name:dataset.name,date,holiday,energy:[off,on,holiday?total:0,total],demand:[dOff,dOn,dHoliday],
-      gaps,status:!any?'ไม่มีข้อมูล':total===null||off===null||on===null?'ข้อมูลไม่ครบ':partial?`ข้อมูลถึง ${rows[s+end].time}`:gaps?'Energy ครบขอบเวลา / Demand อาจไม่ครบ':'ครบขอบเวลา',
+      gaps,status:!any?'ไม่มีข้อมูล':total===null||off===null||on===null?'ข้อมูลไม่ครบ':fallbackNote?`ขอบเวลาขาด: ${fallbackNote}${partial?` / ข้อมูลถึง ${rows[s+end].time}`:''}`:partial?`ข้อมูลถึง ${rows[s+end].time}`:gaps?'Energy ครบขอบเวลา / Demand อาจไม่ครบ':'ครบขอบเวลา',
       calendarKnown:date.startsWith('2026-'),startAt:start===1?'00:15':'00:00',endAt:end>=0?rows[s+end]?.time:null,partial};
   });
 }
